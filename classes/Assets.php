@@ -193,31 +193,25 @@ class Assets {
 		foreach ($assets as $asset)
 		{
 			$filename .= $asset['file'];
-			$f = Kohana::find_file(NULL, $asset['file'], FALSE);
-
-			if (file_exists($f))
-			{
-				$content .= file_get_contents($f);
-			}
-
-			/* TODO: Do we want to support external resource minification?
-			// This can be quite dangerous as relative paths would break.
-			$filename .= $asset['file'];
-			$request = Request::factory(URL::site($asset['file'], TRUE));
-
-			$response = $request->execute();
-
-			if ($response->status() == 200)
-			{
-				$content .= $response->body();
-			}
-			*/
 		}
 
+		$dir = DOCROOT.'assets/css'.DIRECTORY_SEPARATOR;
 		$filename = sha1($filename).$ext;
 
-		$dir = DOCROOT.'assets/css'.DIRECTORY_SEPARATOR;
-		file_put_contents($dir.$filename, $content, LOCK_EX);
+		if ( ! file_exists($dir.$filename))
+		{
+			foreach ($assets as $asset)
+			{
+				$f = Kohana::find_file(NULL, $asset['file'], FALSE);
+
+				if (file_exists($f))
+				{
+					$content .= file_get_contents($f);
+				}
+			}
+
+			file_put_contents($dir.$filename, $content, LOCK_EX);
+		}
 
 		return array(
 			'file' => 'assets/css/'.$filename
