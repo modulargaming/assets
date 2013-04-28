@@ -58,7 +58,7 @@ class Assets {
 			}
 		}
 
-		//if (KOHANA::$environment <= KOHANA::TESTING)
+		if (KOHANA::$environment <= KOHANA::TESTING)
 		{
 			$assets = $this->_minify_assets($assets);
 		}
