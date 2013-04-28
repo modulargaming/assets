@@ -58,7 +58,7 @@ class Assets {
 			}
 		}
 
-		if (KOHANA::$environment <= KOHANA::TESTING)
+		//if (KOHANA::$environment <= KOHANA::TESTING)
 		{
 			$assets = $this->_minify_assets($assets);
 		}
@@ -147,7 +147,7 @@ class Assets {
 				{
 
 					// Should the asset be minified?
-					if (Arr::get($asset, 'minify', FALSE) === TRUE)
+					if (Arr::get($asset, 'minify', TRUE) === TRUE)
 					{
 						$minify[] = $asset;
 					}
