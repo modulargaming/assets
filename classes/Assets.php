@@ -50,10 +50,17 @@ class Assets {
 		$assets = $this->_config[$group];
 
 		// Sort the assets, first iterate sections, then types (script/style).
-		foreach ($assets as $section => $value) {
-			foreach (array_keys($value) as $type) {
+		foreach ($assets as $section => $types)
+		{
+			foreach (array_keys($types) as $type)
+			{
 				usort($assets[$section][$type], array($this, '_sort_assets'));
 			}
+		}
+
+		if (KOHANA::$environment >= KOHANA::TESTING)
+		{
+			$assets = $this->_minify_assets($assets);
 		}
 
 		$this->_assets = $assets;
@@ -95,11 +102,7 @@ class Assets {
 	 */
 	private function _sort_assets($a, $b)
 	{
-		// Set weight to 0 if it's missing.
-		(! isset($a['weight'])) AND $a['weight'] = 0;
-		(! isset($b['weight'])) AND $b['weight'] = 0;
-
-		return $a['weight'] - $b['weight'];
+		return Arr::get($a, 'weight', 0) - Arr::get($b, 'weight', 0);
 	}
 
 	/**
@@ -120,4 +123,108 @@ class Assets {
 		}
 	}
 
+	/**
+	 * Minifies assets.
+	 *
+	 * @param $assets
+	 * @return mixed
+	 */
+	private function _minify_assets($assets)
+	{
+		$benchmark = Profiler::start('Assets', __FUNCTION__);
+
+		foreach ($assets as $section => &$types)
+		{
+
+
+			foreach ($types as $type => &$assets2)
+			{
+				$array = array();
+				$minify = array();
+				$last_key = NULL;
+
+				foreach ($assets2 as $key => $asset)
+				{
+
+					// Should the asset be minified?
+					if (Arr::get($asset, 'minify', FALSE) === TRUE)
+					{
+						$minify[] = $asset;
+					}
+					else
+					{
+						// Do we have a pending minify?
+						if ( ! empty($minify))
+						{
+							$array[] = $this->_generate_minified($type, $minify);
+							$minify = array();
+						}
+
+						$array[] = $asset;
+					}
+				}
+
+				// Do we have a pending minify?
+				if ( ! empty($minify))
+				{
+					$array[] = $this->_generate_minified($type, $minify);
+				}
+
+				$assets2 = $array;
+			}
+		}
+
+		Profiler::stop($benchmark);
+
+		return $assets;
+	}
+
+	private function _generate_minified($type, array $assets)
+	{
+		$content = '';
+		$filename = '';
+
+		$ext = '.js';
+		if ($type == 'style')
+		{
+			$ext = '.css';
+		}
+
+		foreach ($assets as $asset)
+		{
+			$filename .= $asset['file'];
+			$f = Kohana::find_file(NULL, $asset['file'], FALSE);
+
+			if (file_exists($f))
+			{
+				$content .= file_get_contents($f);
+			}
+
+			/* TODO: Do we want to support external resource minification?
+			// This can be quite dangerous as relative paths would break.
+			$filename .= $asset['file'];
+			$request = Request::factory(URL::site($asset['file'], TRUE));
+
+			$response = $request->execute();
+
+			if ($response->status() == 200)
+			{
+				$content .= $response->body();
+			}
+			*/
+		}
+
+		$filename = sha1($filename).$ext;
+
+		$dir = DOCROOT.'assets/css'.DIRECTORY_SEPARATOR;
+		file_put_contents($dir.$filename, $content, LOCK_EX);
+
+		return array(
+			'file' => 'assets/css/'.$filename
+		);
+	}
+
 }
+
+// Load Minify
+// require Kohana::find_file('vendor/minify', 'min/lib/Minify/Loader');
