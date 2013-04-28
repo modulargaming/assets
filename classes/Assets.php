@@ -200,6 +200,7 @@ class Assets {
 
 		if ( ! file_exists($dir.$filename))
 		{
+
 			foreach ($assets as $asset)
 			{
 				$f = Kohana::find_file(NULL, $asset['file'], FALSE);
@@ -208,6 +209,21 @@ class Assets {
 				{
 					$content .= file_get_contents($f);
 				}
+			}
+
+			// Load Minify and register the autoloader.
+			require_once Kohana::find_file('vendor/minify', 'min/lib/Minify/Loader');
+			Minify_Loader::register();
+
+			if ($type == 'style')
+			{
+				$content = Minify_CSS::minify($content, array(
+					'preserveComments' => FALSE
+				));
+			}
+			else if ($type == 'script')
+			{
+				$content = Minify_JS_ClosureCompiler::minify($content);
 			}
 
 			file_put_contents($dir.$filename, $content, LOCK_EX);
@@ -220,5 +236,3 @@ class Assets {
 
 }
 
-// Load Minify
-// require Kohana::find_file('vendor/minify', 'min/lib/Minify/Loader');
