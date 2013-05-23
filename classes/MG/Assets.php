@@ -184,11 +184,13 @@ class MG_Assets {
 		$content = '';
 		$filename = '';
 
-		$ext = '.js';
+		$folder = 'js';
 		if ($type == 'style')
 		{
-			$ext = '.css';
+			$folder = 'css';
 		}
+
+		$ext = '.'.$folder;
 
 		foreach ($assets as $asset)
 		{
@@ -230,7 +232,7 @@ class MG_Assets {
 		}
 
 		return array(
-			'file' => 'assets/css/'.$filename
+			'file' => 'assets/'.$folder.'/'.$filename
 		);
 	}
 
