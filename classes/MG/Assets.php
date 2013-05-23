@@ -197,7 +197,7 @@ class MG_Assets {
 			$filename .= $asset['file'];
 		}
 
-		$dir = DOCROOT.'assets/css'.DIRECTORY_SEPARATOR;
+		$dir = DOCROOT.'assets/'.$folder.'/'.DIRECTORY_SEPARATOR;
 		$filename = sha1($filename).$ext;
 
 		if ( ! file_exists($dir.$filename))
