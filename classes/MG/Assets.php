@@ -203,6 +203,11 @@ class MG_Assets {
 		if ( ! file_exists($dir.$filename))
 		{
 
+			if ( ! is_dir(DOCROOT.'assets/'.$folder))
+			{
+				mkdir(DOCROOT.'assets/'.$folder);
+			}
+
 			foreach ($assets as $asset)
 			{
 				$f = Kohana::find_file(NULL, $asset['file'], FALSE);
