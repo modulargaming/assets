@@ -1,3 +1,0 @@
-[submodule "vendor/minify"]
-	path = vendor/minify
-	url = git://github.com/mrclay/minify.git
