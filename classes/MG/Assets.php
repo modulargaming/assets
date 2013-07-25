@@ -218,10 +218,6 @@ class MG_Assets {
 				}
 			}
 
-			// Load Minify and register the autoloader.
-			require_once Kohana::find_file('vendor/minify', 'min/lib/Minify/Loader');
-			Minify_Loader::register();
-
 			if ($type == 'style')
 			{
 				$content = Minify_CSS::minify($content, array(
