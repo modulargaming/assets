@@ -226,7 +226,7 @@ class MG_Assets {
 			}
 			else if ($type == 'script')
 			{
-				$content = Minify_JS_ClosureCompiler::minify($content);
+				$content = JSMinPlus::minify($content);
 			}
 
 			file_put_contents($dir.$filename, $content, LOCK_EX);
